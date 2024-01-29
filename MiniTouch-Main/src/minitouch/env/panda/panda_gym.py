@@ -278,7 +278,7 @@ class PandaEnv(gym.Env):
         :return:
         """
         view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=camera_pos,
-                                                          distance=.7,
+                                                          distance=1.2,
                                                           yaw=camera_orn[0],
                                                           pitch=camera_orn[1],
                                                           roll=camera_orn[2],

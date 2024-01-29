@@ -75,14 +75,14 @@ def main(args):
             log_dir=log_dir,
             seed=args.seed,
             num_steps=args.num_steps,
-            initial_collection_steps=10000,
+            initial_collection_steps=100,
             initial_learning_steps=10000
         )
         trainer.train()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--num_steps", type=int, default=6 * 10 ** 5)
+    parser.add_argument("--num_steps", type=int, default=6 * 10 ** 4)
     parser.add_argument("--task_name", type=str, default="Pushing-v0")
     parser.add_argument("--action_repeat", type=int, default=1)
     parser.add_argument("--seed", type=int, default=0)

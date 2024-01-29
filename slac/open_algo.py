@@ -28,7 +28,7 @@ class open_SlacAlgorithm:
         action_shape = (5,),
         tactile_shape = (6,),
         action_repeat = 1,
-        device = 'cuda',
+        device = 'cuda:0',
         seed = 1,
         gamma=0.99,
         batch_size_sac=256,

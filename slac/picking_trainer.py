@@ -109,7 +109,9 @@ class picking_Trainer:
         self.algo.buffer.reset_episode(img, tactile)
 
         # Collect trajectories using random policy.
-        for step in range(1, self.initial_collection_steps + 1):
+        steps = tqdm(range(1, self.initial_collection_steps + 1))
+        for step in steps:
+            steps.set_description("Collect trajectories using random policy.")
             t,_ = self.algo.step(self.env, self.ob, t, step <= self.initial_collection_steps)
 
         # Update latent variable model first so that SLAC can learn well using (learned) latent dynamics.
@@ -118,11 +120,13 @@ class picking_Trainer:
             bar.set_description("Updating latent variable model.")
             self.algo.update_latent(self.writer)
             self.algo.update_latent_align(self.writer)
+
+
         # Iterate collection, update and evaluation.
-
-        for step in range(self.initial_collection_steps + 1, self.num_steps // self.action_repeat + 1):
+        mutualsteps=tqdm(range(self.initial_collection_steps + 1, self.num_steps // self.action_repeat + 1))
+        for step in mutualsteps:
+            mutualsteps.set_description("Iterate collection, update and evaluation.")
             t, run_episode = self.algo.step(self.env, self.ob, t, False)
-
             # Update the algorithm.
             self.algo.update_latent(self.writer)
             self.algo.update_sac(self.writer)

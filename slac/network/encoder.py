@@ -4,8 +4,11 @@ import warnings
 import math
 from torch.nn import functional as F
 from torch.distributions import Normal
-
-
+import torch_geometric.nn as geom_nn
+import ts2vg
+from ts2vg import NaturalVG
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader 
 class VTT(nn.Module):
     def __init__(self, img_size=[84], img_patch_size=14, tactile_patches=2, in_chans=3, embed_dim=384, depth=6,
                  num_heads=8, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop_rate=0., attn_drop_rate=0.,
@@ -220,7 +223,70 @@ def _no_grad_trunc_normal_(tensor, mean, std, a, b):
         # Clamp to ensure it's in the proper range
         tensor.clamp_(min=a, max=b)
         return tensor
+    
 
+
+
+'''class Concatenation_Encoder(nn.Module):
+    """
+    Concatenation
+    """
+    def __init__(self, input_dim=3, tactile_dim=6, img_dim=256, tactile_latent_dim=32):
+        super(Concatenation_Encoder, self).__init__()
+
+        self.img_net = nn.Sequential(
+            # (3, 84, 84) -> (42, 42, 42)
+            nn.Conv2d(input_dim, 16, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (32, 42, 42) -> (21, 21, 21)
+            nn.Conv2d(16, 32, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (64, 21, 21) -> (128, 11, 21)
+            nn.Conv2d(32, 64, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (128, 21, 21) -> (256, 11, 11)
+            nn.Conv2d(64, 128, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (128, 11, 11) -> (256, 6,)
+            nn.Conv2d(128, img_dim, 3, 2),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+        self.tactile_net = TactileGraphEncoder(tactile_dim, tactile_latent_dim)
+
+        self.tactile_recognize = nn.Sequential(nn.Linear(tactile_latent_dim + img_dim, 1),
+                                               nn.Sigmoid())
+
+        self.alignment_recognize = nn.Sequential(nn.Linear(tactile_latent_dim + img_dim, 1),
+                                                 nn.Sigmoid())
+
+        self.bottle_neck = nn.Sequential(nn.Linear(tactile_latent_dim + img_dim, tactile_latent_dim + img_dim))
+        self.img_norm = nn.LayerNorm(img_dim)
+        self.tactile_norm = nn.LayerNorm(tactile_latent_dim)
+        self.layer_norm = nn.LayerNorm(tactile_latent_dim + img_dim)
+
+    def forward(self, img, tactile):
+        B, S, C, H, W = img.size()
+        img = img.view(B * S, C, H, W)
+        img_x = self.img_norm(self.img_net(img).view(B * S, -1))
+        tactile = tactile.view(B * S, -1)
+        dataset = []
+        for i in range(tactile.size(0)):
+                    single_tactile = tactile[i, :].cpu()  # Process one sample at a time
+                    vg = NaturalVG()
+                    graph = vg.build(single_tactile)
+                    edges = graph.edges
+                    edge_index = torch.tensor(edges, dtype=torch.int64).t().contiguous().to(img.device)       
+                    single_tactile_node = torch.tensor(single_tactile.squeeze(), dtype=torch.float).reshape([-1, 1]).to(img.device)
+                    data = Data(x=single_tactile_node, edge_index=edge_index)
+                    dataset.append(data)
+        loader = DataLoader(dataset, batch_size=B * S, shuffle=False)
+        data = next(iter(loader)).to(img.device)
+        tactile_x = self.tactile_norm(self.tactile_net(data))
+        x = torch.cat((img_x, tactile_x), dim=1)
+        x = self.layer_norm(x)
+        x = x.view(B, S, -1)
+        return self.bottle_neck(x), self.tactile_recognize(x), self.alignment_recognize(x)'''
 
 class Concatenation_Encoder(nn.Module):
     """
@@ -228,6 +294,109 @@ class Concatenation_Encoder(nn.Module):
     """
     def __init__(self, input_dim=3, tactile_dim=6, img_dim=256, tactile_latent_dim=32):
         super(Concatenation_Encoder, self).__init__()
+
+        self.img_net = nn.Sequential(
+            # (3, 84, 84) -> (42, 42, 42)
+            nn.Conv2d(input_dim, 16, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (32, 42, 42) -> (21, 21, 21)
+            nn.Conv2d(16, 32, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (64, 21, 21) -> (128, 11, 21)
+            nn.Conv2d(32, 64, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (128, 21, 21) -> (256, 11, 11)
+            nn.Conv2d(64, 128, 6, 2, 1),
+            nn.LeakyReLU(0.2, inplace=True),
+            # (128, 11, 11) -> (256, 6,)
+            nn.Conv2d(128, img_dim, 3, 2),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+        #self.tactile_net = nn.Sequential(
+        #    nn.Tanh(),
+        #    nn.Linear(tactile_dim, tactile_latent_dim),
+        #    nn.LayerNorm(tactile_latent_dim),
+        #    nn.LeakyReLU(0.2, inplace=True))
+        self.tactile_net = TactileRNN(tactile_dim, tactile_latent_dim)
+        self.fusion_attention = FusionAttention(img_dim, tactile_latent_dim)
+
+        self.tactile_recognize = nn.Sequential(nn.Linear(tactile_latent_dim + img_dim, 1),
+                                               nn.Sigmoid())
+
+        self.alignment_recognize = nn.Sequential(nn.Linear(tactile_latent_dim + img_dim, 1),
+                                                 nn.Sigmoid())
+
+        self.bottle_neck = nn.Sequential(nn.Linear(tactile_latent_dim + img_dim, tactile_latent_dim + img_dim))
+        self.img_norm = nn.LayerNorm(img_dim)
+        self.tactile_norm = nn.LayerNorm(tactile_latent_dim)
+        self.layer_norm = nn.LayerNorm(tactile_latent_dim + img_dim)
+
+
+    def forward(self, img, tactile):
+        B, S, C, H, W = img.size()
+        img = img.view(B * S, C, H, W)
+        img_x = self.img_norm(self.img_net(img).view(B * S, -1))
+        tactile = tactile.view(B * S, -1)
+        tactile_x = self.tactile_norm(self.tactile_net(tactile))
+        x = torch.cat((img_x, tactile_x), dim=1)
+        fused_features = self.fusion_attention(img_x, tactile_x)
+        fused_features = self.layer_norm(fused_features)
+        fused_features = fused_features.view(B, S, -1)
+        x = fused_features
+        return self.bottle_neck(x), self.tactile_recognize(x), self.alignment_recognize(x)
+
+
+class TactileRNN(nn.Module):
+    def __init__(self, tactile_dim, tactile_latent_dim, hidden_dim=64, num_layers=2):
+        super(TactileRNN, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.num_layers = num_layers
+
+        # LSTM layer
+        self.lstm = nn.LSTM(tactile_dim, hidden_dim, num_layers, batch_first=True)
+
+        # Fully connected layer
+        self.fc = nn.Linear(hidden_dim, tactile_latent_dim)
+
+    def forward(self, x):
+        if x.dim() == 2:
+            x = x.unsqueeze(1)  # Shape becomes [batch_size, 1, tactile_dim]
+
+        # Initialize hidden and cell state
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
+
+        # Forward propagate the LSTM
+        out, _ = self.lstm(x, (h0, c0))
+
+        # Pass the output of the last time step to the fully connected layer
+        out = self.fc(out[:, -1, :])
+        return out
+
+
+
+class FusionAttention(nn.Module):
+    def __init__(self, img_dim, tactile_dim):
+        super(FusionAttention, self).__init__()
+        self.attention_net = nn.Sequential(
+            nn.Linear(img_dim + tactile_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, img_features, tactile_features):
+        combined = torch.cat((img_features, tactile_features), dim=1)
+        attention_weights = self.attention_net(combined)
+        return attention_weights * combined
+
+class Concatenation_Encoder_old(nn.Module):
+    """
+    Concatenation
+    """
+    def __init__(self, input_dim=3, tactile_dim=6, img_dim=256, tactile_latent_dim=32):
+        super(Concatenation_Encoder_old, self).__init__()
 
         self.img_net = nn.Sequential(
             # (3, 84, 84) -> (42, 42, 42)

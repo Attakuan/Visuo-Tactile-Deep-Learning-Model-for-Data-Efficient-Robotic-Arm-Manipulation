@@ -59,7 +59,7 @@ class LatentModel(nn.Module):
         z1_dim=32,
         z2_dim=256,
         hidden_units=(256, 256),
-        encoder='VTT'
+        encoder='Concat'
     ):
         super(LatentModel, self).__init__()
 

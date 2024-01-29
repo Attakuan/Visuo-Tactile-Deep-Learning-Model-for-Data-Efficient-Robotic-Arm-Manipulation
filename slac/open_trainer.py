@@ -109,7 +109,7 @@ class open_Trainer:
         self.algo.buffer.reset_episode(img, tactile)
 
         # Collect trajectories using random policy.
-        for step in range(1, self.initial_collection_steps + 1):
+        for step in tqdm(range(1, self.initial_collection_steps + 1)):
             t,_ = self.algo.step(self.env, self.ob, t, step <= self.initial_collection_steps)
 
         # Update latent variable model first so that SLAC can learn well using (learned) latent dynamics.
