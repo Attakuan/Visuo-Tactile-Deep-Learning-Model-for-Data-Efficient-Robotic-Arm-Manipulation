@@ -1,5 +1,7 @@
+
+
 # Visuo-Tactile Transformers for Manipulation
-For CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121)
+Codes forked fom CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121)
 
 Requirements:<br />
 torch==1.9.0<br />
@@ -31,7 +33,6 @@ python train.py --encoder="Concatenation" --seed=1 --task_name="Opening-v0"<br /
 Read Results with read_pickle.py<br />
 
 # Credits<br />
-The code is based on SLAC.pytorch version and Minitouch but heavily modified.
 Orignal Codes:
 
 - Toshiki Watanabe, Jan Schneider
@@ -47,3 +48,8 @@ Orignal Codes:
 - 0.0.1
 - source code
 - https://github.com/ServiceNow/MiniTouch
+
+
+- Yizhou Chen, Andrea Sipos, Mark Van der Merwe, Nima Fazeli
+- Original Forked Code
+- https://github.com/yich7045/Visuo-Tactile-Transformers-for-Manipulation
