@@ -1,6 +1,6 @@
 
 
-# Visuo-Tactile Transformers for Manipulation
+# Visuo-Tactile Deep Learning Model for Data Efficient Robotic Arm Manipulation
 
 Baselines forked from CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121) <br />
 
