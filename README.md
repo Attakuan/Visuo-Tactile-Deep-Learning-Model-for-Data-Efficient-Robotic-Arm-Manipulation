@@ -1,7 +1,7 @@
 
 
 # Visuo-Tactile Transformers for Manipulation
-Codes forked fom CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121)
+Codes forked from CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121)
 
 Requirements:<br />
 torch==1.9.0<br />
