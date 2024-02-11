@@ -1,55 +1,57 @@
 
 
 # Visuo-Tactile Transformers for Manipulation
-Codes forked from CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121)
 
-Requirements:<br />
-torch==1.9.0<br />
-tqdm==4.48.2<br />
-pybullet==3.1.8<br />
-gym==0.17.2<br />
-matplotlib==3.4.3<br />
-numpy==1.21.2<br />
-pandas==1.1.2<br />
+Baselines forked from CoRL 2022 Paper: [Visuo-Tactile Transformers for Manipulation](https://arxiv.org/abs/2210.00121) <br />
 
-Minitouch Installation:<br />
-cd Minitouch<br />
-pip install -e .<br />
-
-Available Tasks: Visualization with Debug mode, e.g., "PushingDebug-v0"<br />
-Pushing-v0<br />
-Opening-v0<br />
-Picking-v0<br />
-Inserting-v0<br />
+In this project, we present a novel model for fusing Visuo-Tactile data for robot manipulation task. We propose: <br />
+```
+Convolutional Layer for visual data stream.
+LSTM for tactile data stream
+Attention layer for fusing the both streams.
+```
 
 
-Example of Running Code:<br />
-VTT:<br />
-python train.py --encoder="VTT" --seed=0 --task_name="Pushing-v0"<br />
-Baselines:<br />
-python train.py --encoder="POE" --seed=1 --task_name="PickingDebug-v0"<br />
-python train.py --encoder="Concatenation" --seed=1 --task_name="Opening-v0"<br />
+Baselines for fusing Visuo-Tactile data:<br />
+```
+  Visuo-Tactile Transformer (VTT)
+  Product-of-Experts (PoE)
+  Concatenation (Concat)
+  ```
+  Requirements:<br />
+```
+  torch==1.9.0
+  tqdm==4.48.2
+  pybullet==3.1.8
+  gym==0.17.2
+  matplotlib==3.4.3
+  numpy==1.21.2
+  pandas==1.1.2
+  ```
+  Minitouch Installation:
+  ```
+  cd Minitouch
+  pip install -e .
+  ```
+  Available Tasks:
+  ```
+  Pushing-v0
+  Opening-v0
+  Picking-v0
+  Inserting-v0
+  ```
+  
+  Example of Running Code:
+  ```
+  python train.py --encoder="VTT" --seed=0 --task_name="Pushing-v0"
+ ```
 
 Read Results with read_pickle.py<br />
 
+For detailed information check Report.pdf <br />
+
 # Credits<br />
 Orignal Codes:
-
-- Toshiki Watanabe, Jan Schneider
-- Oct 5, 2021
-- slac.pytorch
-- 1.6.0
-- source code
-- https://github.com/ku2482/slac.pytorch
-
-- Sai Rajeswar, Cyril Ibrahim and Daniel Tremblay
-- Jan 8, 2021
-- Minitouch
-- 0.0.1
-- source code
-- https://github.com/ServiceNow/MiniTouch
-
-
 - Yizhou Chen, Andrea Sipos, Mark Van der Merwe, Nima Fazeli
-- Original Forked Code
+Original Forked Code:
 - https://github.com/yich7045/Visuo-Tactile-Transformers-for-Manipulation
