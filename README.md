@@ -53,5 +53,4 @@ For detailed information check Report.pdf <br />
 # Credits<br />
 Orignal Codes:
 - Yizhou Chen, Andrea Sipos, Mark Van der Merwe, Nima Fazeli
-Original Forked Code:
 - https://github.com/yich7045/Visuo-Tactile-Transformers-for-Manipulation
