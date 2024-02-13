@@ -48,6 +48,12 @@ Baselines for fusing Visuo-Tactile data:<br />
 
 Read Results with read_pickle.py<br />
 
+DEMO <br />
+
+![]([https://github.com/Your_Repository_Name/Your_GIF_Name.gif](https://github.com/Attakuan/Visuo-Tactile-Deep-Learning-Model-for-Data-Efficient-Robotic-Arm-Manipulation/blob/main/demo.gif))
+
+
+
 For detailed information check Report.pdf <br />
 
 # Credits<br />
