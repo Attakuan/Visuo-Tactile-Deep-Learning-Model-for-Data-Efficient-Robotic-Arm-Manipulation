@@ -15,7 +15,7 @@ Attention layer for fusing the both streams.
 Baselines for fusing Visuo-Tactile data:<br />
 ```
   Visuo-Tactile Transformer (VTT)
-  Product-of-Experts (PoE)
+  Product-of-Experts (POE)
   Concatenation (Concat)
   ```
   Requirements:<br />
